@@ -1,0 +1,9 @@
+mobilenet_env/
+
+__pycache__/
+*.pyc
+*.onnx
+*.bin
+*.xml
+.streamlit/
+.mobilenet_env

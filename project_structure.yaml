@@ -1,0 +1,41 @@
+project_name: mobilenetv3-vehicle-classification-openvino
+
+root:
+  README.md: project documentation
+  requirements.txt: python dependencies
+
+models:
+  mobilenetv3.pth:
+    description: PyTorch pretrained model weights
+  mobilenetv3.onnx:
+    description: ONNX exported model (intermediate)
+  mobilenetv3.xml:
+    description: OpenVINO IR XML
+  mobilenetv3.bin:
+    description: OpenVINO IR weights
+
+src:
+  app.py:
+    description: Streamlit GUI entry point
+  inference_baseline.py:
+    description: PyTorch FP32 inference logic
+  inference_openvino.py:
+    description: OpenVINO FP16 inference logic
+  preprocess.py:
+    description: Image preprocessing utilities
+  postprocess.py:
+    description: Output decoding and class mapping
+  metrics.py:
+    description: Latency and FPS measurement
+  model_loader.py:
+    description: Model download and loading logic
+
+data:
+  sample_images:
+    description: Sample vehicle images for testing
+
+convert:
+  export_to_onnx.py:
+    description: PyTorch to ONNX conversion
+  onnx_to_openvino.sh:
+    description: ONNX to OpenVINO IR conversion script

@@ -1,0 +1,79 @@
+
+---
+
+# 📄 `functional_workflows.yaml`
+*(Execution & logical flow of the system)*
+
+```yaml
+application_workflow:
+  entry_point:
+    type: streamlit_app
+    file: src/app.py
+
+  user_actions:
+    - upload_image
+    - select_backend:
+        options:
+          - pytorch_fp32
+          - openvino_fp16
+          - compare
+    - click_run_inference
+
+  preprocessing_stage:
+    input: image
+    operations:
+      - resize: [224, 224]
+      - normalize:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+    output: input_tensor
+
+  inference_stage:
+    pytorch_fp32:
+      framework: PyTorch
+      model: MobileNetV3 Small
+      precision: FP32
+      execution: cpu
+    openvino_fp16:
+      framework: OpenVINO
+      model_format: IR (XML + BIN)
+      precision: FP16
+      execution: cpu
+
+  postprocessing_stage:
+    operations:
+      - softmax
+      - argmax
+      - class_mapping:
+          0: Two-Wheeler
+          1: Four-Wheeler
+    output:
+      - predicted_label
+      - confidence_score
+
+  performance_measurement:
+    metrics:
+      - latency_ms
+      - fps
+    measurement_scope:
+      - inference_only
+
+  visualization_stage:
+    ui: streamlit
+    displays:
+      - input_image
+      - predicted_label
+      - confidence
+      - backend_type
+      - latency
+      - fps
+      - comparison_view (if enabled)
+
+  comparison_mode:
+    enabled: true
+    compares:
+      - pytorch_fp32
+      - openvino_fp16
+    output:
+      - side_by_side_metrics
+      - performance_table

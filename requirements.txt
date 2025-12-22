@@ -1,0 +1,11 @@
+torch
+torchvision
+onnxscript
+onnx
+onnxruntime
+openvino
+openvino-dev
+opencv-python 
+numpy
+pillow
+streamlit
