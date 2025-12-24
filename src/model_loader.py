@@ -8,21 +8,24 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
 MODEL_PATH = os.path.join(MODELS_DIR, "mobilenetv3.pth")
 
+
 def load_model():
-    # Ensure models/ directory exists
     os.makedirs(MODELS_DIR, exist_ok=True)
+
+    # Always create model with same architecture
+    model = models.mobilenet_v3_small(weights=None)
 
     if not os.path.exists(MODEL_PATH):
         print("Downloading MobileNetV3 pretrained weights...")
-        weights = MobileNet_V3_Small_Weights.DEFAULT
-        model = models.mobilenet_v3_small(weights=weights)
+        pretrained = models.mobilenet_v3_small(
+            weights=MobileNet_V3_Small_Weights.DEFAULT
+        )
+        model.load_state_dict(pretrained.state_dict())
         torch.save(model.state_dict(), MODEL_PATH)
         print("Model saved at:", MODEL_PATH)
     else:
         print("Loading model from local file...")
+        model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
 
-    model = models.mobilenet_v3_small(weights=None)
-    model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
     model.eval()
-
     return model

@@ -1,79 +1,57 @@
 
 ---
 
-# 📄 `functional_workflows.yaml`
-*(Execution & logical flow of the system)*
+# 📄 `functional_workflow.yaml`
 
 ```yaml
-application_workflow:
-  entry_point:
-    type: streamlit_app
-    file: src/app.py
+project_name: Vehicle Intelligence Pipeline
 
-  user_actions:
-    - upload_image
-    - select_backend:
-        options:
-          - pytorch_fp32
-          - openvino_fp16
-          - compare
-    - click_run_inference
+input:
+  - type: image
+  - format: jpg, jpeg, png
 
-  preprocessing_stage:
-    input: image
-    operations:
-      - resize: [224, 224]
-      - normalize:
-          mean: [0.485, 0.456, 0.406]
-          std: [0.229, 0.224, 0.225]
-    output: input_tensor
+workflow:
+  - step: load_image
+    description: Read input image from file or upload
 
-  inference_stage:
-    pytorch_fp32:
-      framework: PyTorch
-      model: MobileNetV3 Small
-      precision: FP32
-      execution: cpu
-    openvino_fp16:
-      framework: OpenVINO
-      model_format: IR (XML + BIN)
-      precision: FP16
-      execution: cpu
-
-  postprocessing_stage:
-    operations:
-      - softmax
-      - argmax
-      - class_mapping:
-          0: Two-Wheeler
-          1: Four-Wheeler
+  - step: vehicle_detection
+    model: SSD-MobileNet (COCO)
     output:
-      - predicted_label
-      - confidence_score
+      - bounding_boxes
+      - vehicle_type (car, motorcycle, bus, truck)
+      - detection_confidence
 
-  performance_measurement:
-    metrics:
-      - latency_ms
-      - fps
-    measurement_scope:
-      - inference_only
+  - step: vehicle_crop
+    description: Crop detected vehicle regions from image
 
-  visualization_stage:
-    ui: streamlit
-    displays:
-      - input_image
-      - predicted_label
-      - confidence
-      - backend_type
-      - latency
-      - fps
-      - comparison_view (if enabled)
+  - step: vehicle_classification
+    model:
+      - PyTorch MobileNetV3 (FP32)
+      - OpenVINO MobileNetV3 (FP16)
+    purpose: Auxiliary classification (not final type)
 
-  comparison_mode:
-    enabled: true
-    compares:
-      - pytorch_fp32
-      - openvino_fp16
+  - step: color_detection
+    method: HSV pixel voting
+    optimization: Center crop to avoid road/tires
     output:
-      - side_by_side_metrics
-      - performance_table
+      - dominant_color
+
+  - step: vlm_reasoning (optional)
+    trigger:
+      - color == Unknown
+      - low confidence
+    description: Vision-Language reasoning for fallback
+
+  - step: visualization
+    outputs:
+      - bounding boxes
+      - vehicle type
+      - vehicle color
+
+metrics:
+  - latency_ms
+  - fps
+
+interfaces:
+  - CLI
+  - Streamlit GUI

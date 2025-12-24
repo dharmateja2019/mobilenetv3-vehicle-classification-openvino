@@ -1,9 +1,36 @@
-mobilenet_env/
-
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+
+.venv/
+*_env/
+
+# OpenVINO / AI artifacts
 *.onnx
 *.bin
 *.xml
-.streamlit/
-.mobilenet_env
+*.pt
+*.pth
+*.engine
+
+# Datasets & media
+data/
+datasets/
+*.mp4
+*.avi
+*.jpg
+*.png
+
+# Build artifacts
+build/
+dist/
+.cache/
+.pytest_cache/
+
+# OS
+.DS_Store
