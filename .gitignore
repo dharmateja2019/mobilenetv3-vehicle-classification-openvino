@@ -46,13 +46,15 @@ outputs/
 # ===============================
 # Model files (DO NOT COMMIT)
 # ===============================
-models/**/*.bin
-models/**/*.xml
-models/**/*.onnx
-models/**/*.pt
-models/**/*.pth
-models/**/*.engine
-models/**/*.blob
+models/
+*.pt
+*.pth
+*.onnx
+*.xml
+*.bin
+*.pb
+*.tar.gz
+
 
 # HuggingFace cache (VLM models ~GBs)
 .cache/
