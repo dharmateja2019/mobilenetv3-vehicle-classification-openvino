@@ -1,36 +1,95 @@
+# ===============================
+# OS / Editor
+# ===============================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ===============================
 # Python
+# ===============================
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
-*.log
+*.so
+*.egg-info/
+dist/
+build/
 
 # Virtual environments
-
+venv/
 .venv/
-*_env/
+env/
+ENV/
+virtual_ai/
 
-# OpenVINO / AI artifacts
-*.onnx
-*.bin
-*.xml
-*.pt
-*.pth
-*.engine
+# ===============================
+# Jupyter
+# ===============================
+.ipynb_checkpoints/
 
-# Datasets & media
-data/
-datasets/
-*.mp4
-*.avi
+# ===============================
+# Streamlit
+# ===============================
+.streamlit/
+
+# ===============================
+# Outputs / Generated files
+# ===============================
+outputs/
 *.jpg
+*.jpeg
 *.png
 
-# Build artifacts
-build/
-dist/
-.cache/
-.pytest_cache/
+# ===============================
+# Model files (DO NOT COMMIT)
+# ===============================
+models/**/*.bin
+models/**/*.xml
+models/**/*.onnx
+models/**/*.pt
+models/**/*.pth
+models/**/*.engine
+models/**/*.blob
 
-# OS
+# HuggingFace cache (VLM models ~GBs)
+.cache/
+**/.cache/
+**/huggingface/
+
+# OpenVINO cache
+*.cache
+openvino_cache/
+
+# ===============================
+# Logs
+# ===============================
+*.log
+
+# ===============================
+# Environment variables
+# ===============================
+.env
+.env.*
+
+# ===============================
+# System / Temp
+# ===============================
+tmp/
+temp/
+*.tmp
+
+# ===============================
+# macOS specific
+# ===============================
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# ===============================
+# Optional: large downloads
+# ===============================
+model.safetensors
+*.safetensors

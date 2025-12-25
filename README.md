@@ -1,207 +1,159 @@
+# Vehicle Detection & Classification  
+YOLO + MobileNetV3 | PyTorch vs OpenVINO
+
+This project implements a **complete end-to-end vehicle detection and classification pipeline** with optimized inference using OpenVINO.  
+It supports **CLI and Streamlit GUI**, along with **PyTorch vs OpenVINO performance comparison**.
+
+---
+
+## 🚀 Overview
+
+The system performs:
+
+1. **Vehicle detection** using YOLO
+2. **Vehicle classification** using MobileNetV3
+   - 2-Wheeler (2W)
+   - 4-Wheeler (4W)
+3. **Model export & optimization**
+   - PyTorch → ONNX → OpenVINO IR
+4. **Inference backends**
+   - PyTorch
+   - OpenVINO
+5. **Interfaces**
+   - CLI (`cli.py`)
+   - Streamlit GUI (`app.py`)
+
+The project follows a **production-style pipeline**, separating inference logic, pipeline orchestration, tests, and UI.
+
+---
+
+## 🧠 Architecture
+
 Input Image
-   ↓
-Vehicle Detection (SSD-MobileNet)
-   ↓
-Crop Vehicle(s)
-   ↓
-Vehicle Classification (PyTorch / OpenVINO)
-   ↓
-Vehicle Color Detection (HSV)
-   ↓
-Optional VLM Reasoning
-     ├─ Vehicle-level reasoning
-     └─ Full-image fallback (if detection fails)
+↓
+YOLO Detection (src/detect.py)
+↓
+Vehicle Crops (NumPy arrays)
+↓
+MobileNetV3 Classifier
+├── PyTorch (src/classify/train.py)
+└── OpenVINO (src/classify/openvino_infer.py)
+↓
+Annotated Output + Metrics
 
-🚀 Features
+yaml
+Copy code
 
-SSD-MobileNet vehicle detection (COCO)
+---
 
-MobileNetV3 classification (ImageNet)
+## ✅ Project Status
 
-Classical CV color detection (HSV)
+### STEP-1: Vehicle Detection — ✅ DONE
+- YOLO-based detection
+- Bounding box extraction
+- Auto-cropping vehicles
+- CLI + unit tests
 
-Refined center-crop color extraction
+### STEP-2: Vehicle Classification — ✅ DONE
+- Dataset created from YOLO crops
+- MobileNetV3 trained using PyTorch
+- CLI-based classification validation
 
-PyTorch FP32 vs OpenVINO FP16 comparison
+Dataset summary:
+- 2W images: 15
+- 4W images: 36
 
-Per-backend latency & FPS metrics
+> Dataset is intentionally small to validate the pipeline, not for production accuracy.
 
-CLI for automation & benchmarking
+---
 
-Streamlit GUI with Run button
+### STEP-3: Model Export — ✅ DONE
+- PyTorch → ONNX (`export_onnx.py`)
 
-Real Vision–Language Model (VLM) integration
+### STEP-4: OpenVINO Conversion — ✅ DONE
+- ONNX → OpenVINO IR (`openvino_convert.sh`)
+- FP16 optimized model
 
-Clean compare mode (PyTorch vs OpenVINO)
+### STEP-5: Inference & Comparison — ✅ DONE
+- PyTorch inference
+- OpenVINO inference
+- Latency & FPS comparison
+- Prediction parity verified
 
-🛠 Requirements
+### STEP-6: CLI & GUI — ✅ DONE
+- Unified pipeline (`src/pipeline.py`)
+- CLI with backend/device selection
+- Streamlit GUI with side-by-side comparison
+- Clean tables and annotated images
 
-Python 3.11
+---
 
-OS: Linux / macOS / Windows
+## 🧪 CLI Usage
 
-CPU (GPU / FPGA selectable in GUI, optional)
+### Single Backend
+```bash
+python3 cli.py --image path/to/image.jpg --backend openvino --device CPU
+Compare PyTorch vs OpenVINO
+bash
+Copy code
+python3 cli.py --image path/to/image.jpg --backend compare --device CPU
+Outputs:
 
-🧪 Environment Setup
-1️⃣ Create virtual environment
-python3 -m venv mobilenet_env
-source mobilenet_env/bin/activate
+outputs/result.jpg
 
-2️⃣ Install dependencies
-pip install --upgrade pip
-pip install torch torchvision
-pip install opencv-python
-pip install openvino
-pip install streamlit pandas numpy
-pip install openai
+outputs/result_pytorch.jpg
 
-🔑 VLM Setup (Required for VLM)
+outputs/result_openvino.jpg
 
-This project uses a real Vision–Language Model (OpenAI GPT-4o-mini).
+🖥️ Streamlit GUI
+Run:
 
-Set your API key:
-
-export OPENAI_API_KEY="your_api_key_here"
-
-
-⚠️ VLM is optional and disabled by default.
-It is not used for FPS benchmarking.
-
-📦 Model Downloads (VERY IMPORTANT)
-🔹 A. SSD-MobileNet (Vehicle Detection)
-mkdir -p models/ssd_mobilenet
-cd models/ssd_mobilenet
-
-wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz
-tar -xvf ssd_mobilenet_v2_coco_2018_03_29.tar.gz
-
-mv ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb .
-wget https://raw.githubusercontent.com/opencv/opencv_extra/master/testdata/dnn/ssd_mobilenet_v2_coco_2018_03_29.pbtxt
-
-
-Final structure:
-
-models/ssd_mobilenet/
-├── frozen_inference_graph.pb
-└── ssd_mobilenet_v2_coco_2018_03_29.pbtxt
-
-🔹 B. MobileNetV3 OpenVINO Model (Classification)
-
-Place converted OpenVINO IR files here:
-
-models/ir/
-├── mobilenetv3.xml
-└── mobilenetv3.bin
-
-
-⚠️ Conversion scripts are intentionally excluded.
-
-📁 Project Structure
-project_root/
-├── app.py
-├── README.md
-├── outputs/
-├── models/
-│   ├── ssd_mobilenet/
-│   └── ir/
-└── src/
-    ├── run_infer_cli.py
-    ├── detector_ssd_mobilenet.py
-    ├── inference_baseline.py
-    ├── inference_openvino.py
-    ├── color_extractor.py
-    ├── preprocess.py
-    ├── postprocess.py
-    ├── metrics.py
-    └── vlm_reasoner.py
-
-🧪 CLI Usage
-▶ Run with OpenVINO
-python src/run_infer_cli.py --image path/to/image.jpg --backend openvino
-
-▶ Run with PyTorch
-python src/run_infer_cli.py --image path/to/image.jpg --backend pytorch
-
-▶ Compare PyTorch vs OpenVINO
-python src/run_infer_cli.py --image path/to/image.jpg --backend compare
-
-▶ Enable VLM reasoning
-python src/run_infer_cli.py --image path/to/image.jpg --backend openvino --use-vlm
-
-
-CLI Output Includes:
-
-   Per-backend latency & FPS
-
-   Per-vehicle type & color
-
-   Optional VLM reasoning
-
-   VLM fallback when detection fails
-
-🖥 Streamlit GUI
+bash
+Copy code
 streamlit run app.py
+Features:
 
-GUI Features
+Backend selection (PyTorch / OpenVINO / Compare)
 
-   Upload image
+Device selection
 
-   Select backend (PyTorch / OpenVINO / Compare)
+Vehicle table
 
-   Select device (CPU / GPU / AUTO / FPGA – UI level)
+Annotated images
 
-   Run Inference button
+Performance comparison
 
-   View bounding boxes
+⚡ Performance Example
+Backend	Latency (ms)	FPS
+PyTorch	~435	~2.3
+OpenVINO	~244	~4.1
+Speedup	~1.8×	—
 
-   Per-vehicle type & color
+🧩 Tech Stack
+Python 3.11.9
+YOLO (Ultralytics)
+PyTorch
+MobileNetV3
+ONNX
+onnxscript
+OpenVINO Runtime
+OpenCV, NumPy
+Streamlit
 
-   Per-backend latency & FPS
+🎯 Key Engineering Decisions
+Classifiers accept NumPy arrays or file paths
 
-   Optional VLM reasoning section
+No runtime dependency on test modules
 
-   Annotated output image
+Single pipeline shared by CLI & GUI
 
-⚠️ Known Limitations (Current Stage)
+Clean separation of logic and presentation
 
-   SSD-MobileNet may misclassify:
+Optimized inference without accuracy loss
 
-   Front-facing cars
+👤 Author
+Dharmateja
+QA Engineer | AI & OpenVINO Practitioner
 
-   Scooters in narrow lanes
-
-   ImageNet classifier is not vehicle-specific
-
-   VLM adds latency and should not be used for benchmarking
-
-   These are model limitations, not pipeline bugs.
-
-🔮 Planned Enhancements
-
-   YOLOv8 detector option
-
-   Better 2-wheeler recall
-
-   VLM override policy (trust VLM over CV)
-
-   Video & multi-object tracking
-
-   GPU / FPGA enablement in OpenVINO
-
-   CSV export of benchmark results
-
-👨‍💻 Engineering Notes
-
-This project emphasizes system design over raw accuracy.
-
-It demonstrates:
-
-   Multi-backend inference
-
-   Honest benchmarking
-
-   Explainable AI via VLM
-
-   Clean CLI & GUI separation
-
-   Real-world AI orchestration patterns
+yaml
+Copy code

@@ -1,57 +1,69 @@
 
 ---
 
-# 📄 `functional_workflow.yaml`
+# 🔁 `functional_workflow.yaml` (FINAL – MATCHES CODE)
 
 ```yaml
-project_name: Vehicle Intelligence Pipeline
-
-input:
-  - type: image
-  - format: jpg, jpeg, png
+project_name: mobilenetv3-vehicle-classification-openvino
+description: End-to-end vehicle detection and classification with PyTorch and OpenVINO
 
 workflow:
-  - step: load_image
-    description: Read input image from file or upload
 
-  - step: vehicle_detection
-    model: SSD-MobileNet (COCO)
+  step_1_vehicle_detection:
+    status: completed
+    script: src/detect.py
+    model: YOLO
+    input: image
     output:
       - bounding_boxes
-      - vehicle_type (car, motorcycle, bus, truck)
-      - detection_confidence
+      - vehicle_crops
 
-  - step: vehicle_crop
-    description: Crop detected vehicle regions from image
-
-  - step: vehicle_classification
-    model:
-      - PyTorch MobileNetV3 (FP32)
-      - OpenVINO MobileNetV3 (FP16)
-    purpose: Auxiliary classification (not final type)
-
-  - step: color_detection
-    method: HSV pixel voting
-    optimization: Center crop to avoid road/tires
+  step_2_vehicle_classification:
+    status: completed
+    model: MobileNetV3
+    framework: PyTorch
+    classes:
+      - 2W
+      - 4W
+    dataset:
+      two_wheeler: 15
+      four_wheeler: 36
     output:
-      - dominant_color
+      - predicted_class
+      - confidence
 
-  - step: vlm_reasoning (optional)
-    trigger:
-      - color == Unknown
-      - low confidence
-    description: Vision-Language reasoning for fallback
+  step_3_model_export:
+    status: completed
+    script: src/classify/export_onnx.py
+    from: PyTorch
+    to: ONNX
+    output: mobilenetv3_2w4w.onnx
 
-  - step: visualization
-    outputs:
-      - bounding boxes
-      - vehicle type
-      - vehicle color
+  step_4_openvino_conversion:
+    status: completed
+    script: openvino_convert.sh
+    input: mobilenetv3_2w4w.onnx
+    output:
+      - mobilenetv3_2w4w.xml
+      - mobilenetv3_2w4w.bin
+    precision: FP16
 
-metrics:
-  - latency_ms
-  - fps
+  step_5_inference:
+    status: completed
+    pipeline: src/pipeline.py
+    backends:
+      - pytorch
+      - openvino
+    metrics:
+      - latency_ms
+      - fps
 
-interfaces:
-  - CLI
-  - Streamlit GUI
+  step_6_interfaces:
+    status: completed
+    interfaces:
+      - CLI (cli.py)
+      - Streamlit GUI (app.py)
+    features:
+      - backend_comparison
+      - annotated_images
+      - vehicle_tables

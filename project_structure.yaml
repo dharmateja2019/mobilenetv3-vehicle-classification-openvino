@@ -1,50 +1,42 @@
 project_root:
-  app.py:
-    description: Streamlit GUI for vehicle inference
+  ├── cli.py
+  ├── app.py
+  ├── README.md
+  ├── requirements.txt
+  ├── project_structure.yaml
+  ├── functional_workflow.yaml
+  ├── openvino_convert.sh
+  ├── .gitignore
 
-  models:
-    ssd_mobilenet:
-      frozen_inference_graph.pb:
-        description: SSD-MobileNet COCO detection model
-      ssd_mobilenet_v2_coco_2018_03_29.pbtxt:
-        description: Detection model config
+  ├── src:
+  │   ├── pipeline.py
+  │   ├── detect.py
+  │   ├── color
+  │   └── classify:
+  │       ├── train.py
+  │       ├── export_onnx.py
+  │       ├── openvino_infer.py
+  │       └── __pycache__
 
-    ir:
-      mobilenetv3.xml:
-        description: OpenVINO IR model
-      mobilenetv3.bin:
-        description: OpenVINO IR weights
+  ├── test:
+  │   ├── __init__.py
+  │   ├── test_detect.py
+  │   ├── test_classify.py
+  │   ├── test_openvino_classify.py
+  │   ├── test_latency_compare.py
+  │   └── test_pipeline.py
 
-  src:
-    run_infer_cli.py:
-      description: CLI entry point with compare & metrics
+  ├── models:
+  │   └── classify:
+  │       ├── pytorch
+  │       ├── onnx
+  │       └── openvino
 
-    detector_ssd_mobilenet.py:
-      description: Vehicle detection using SSD-MobileNet
+  ├── data:
+  │   └── classify/2w,2W and raw_images
 
-    inference_baseline.py:
-      description: PyTorch FP32 inference
+  ├── tools --auto_crop_dataset.py
 
-    inference_openvino.py:
-      description: OpenVINO FP16 inference
+  ├── outputs
 
-    color_extractor.py:
-      description: HSV-based vehicle color detection
-
-    preprocess.py:
-      description: Input preprocessing for models
-
-    postprocess.py:
-      description: Model output decoding
-
-    metrics.py:
-      description: Latency & FPS measurement utilities
-
-    vlm_reasoner.py:
-      description: Optional VLM reasoning interface (mock)
-
-  outputs:
-    description: Annotated output images
-
-  README.md:
-    description: Project documentation
+  └── vechicle-ai
