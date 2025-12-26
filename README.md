@@ -1,31 +1,52 @@
-Vehicle Detection & Classification
+🚗 Vehicle Detection, Classification & Scene Understanding
 
-YOLO + MobileNetV3 | PyTorch vs OpenVINO
+YOLO + MobileNetV3 | PyTorch vs OpenVINO | VLM (Qwen2.5)
 
-This project implements a complete end-to-end vehicle detection and classification pipeline with optimized inference using OpenVINO.
-It supports both CLI and Streamlit GUI, along with PyTorch vs OpenVINO performance comparison.
+This project implements a production-style, end-to-end vehicle detection and classification pipeline with optimized inference using OpenVINO, and an optional Vision-Language Model (VLM) for natural-language scene understanding.
+
+It supports:
+
+CLI
+
+Streamlit GUI
+
+Fair PyTorch vs OpenVINO performance comparison
+
+Optional, lightweight VLM reasoning
 
 🚀 Overview
 
 The system performs:
 
-Vehicle detection using YOLO
+Vehicle Detection
 
-Vehicle classification using MobileNetV3
+YOLO (Ultralytics)
+
+Vehicle Classification
+
+MobileNetV3
+
+Classes:
 
 2-Wheeler (2W)
 
 4-Wheeler (4W)
 
-Model export & optimization
+Model Export & Optimization
 
-PyTorch → ONNX → OpenVINO IR
+PyTorch → ONNX → OpenVINO IR (FP16)
 
-Inference backends
+Inference Backends
 
 PyTorch
 
-OpenVINO
+OpenVINO (CPU-optimized)
+
+Optional Vision-Language Reasoning (VLM)
+
+Natural-language Q&A over detection results
+
+Powered by Qwen2.5-0.5B-Instruct
 
 Interfaces
 
@@ -33,20 +54,37 @@ CLI (cli.py)
 
 Streamlit GUI (app.py)
 
-The project follows a production-style pipeline, separating inference logic, pipeline orchestration, tests, and UI.
+The project follows a clean, production-style architecture, separating:
+
+Computer Vision (CV)
+
+Inference optimization
+
+Language reasoning
+
+UI / orchestration
 
 🧠 Architecture
 Input Image
    ↓
 YOLO Detection (src/detect.py)
    ↓
-Vehicle Crops (NumPy arrays)
+Vehicle Crops
    ↓
-MobileNetV3 Classifier
-   ├── PyTorch (src/classify/train.py)
-   └── OpenVINO (src/classify/openvino_infer.py)
+MobileNetV3 Classification
+   ├── PyTorch
+   └── OpenVINO (FP16)
    ↓
 Annotated Output + Metrics
+   ↓
+(Optional)
+Vision-Language Model (Qwen2.5-0.5B)
+   ↓
+Natural-Language Answers
+
+
+Important:
+VLM runs after CV inference and is not included in latency/FPS metrics.
 
 ✅ Project Status
 STEP-1: Vehicle Detection — ✅ DONE
@@ -65,7 +103,7 @@ Dataset created from YOLO crops
 
 MobileNetV3 trained using PyTorch
 
-CLI-based classification validation
+CLI-based validation
 
 Dataset summary
 
@@ -73,7 +111,7 @@ Dataset summary
 
 4W images: 36
 
-Dataset is intentionally small to validate the pipeline, not for production accuracy.
+Dataset size is intentionally small to validate the pipeline, not for production accuracy.
 
 STEP-3: Model Export — ✅ DONE
 
@@ -91,7 +129,7 @@ PyTorch inference
 
 OpenVINO inference
 
-Latency & FPS comparison
+Latency & FPS comparison (CV pipeline only)
 
 Prediction parity verified
 
@@ -99,11 +137,21 @@ STEP-6: CLI & GUI — ✅ DONE
 
 Unified pipeline (src/pipeline.py)
 
-CLI with backend/device selection
+Backend/device selection
 
-Streamlit GUI with side-by-side comparison
+Streamlit GUI with comparison mode
 
 Clean tables and annotated images
+
+STEP-7: Vision-Language Model (VLM) — ✅ DONE
+
+Lightweight reasoning using Qwen2.5-0.5B-Instruct
+
+Lazy-loaded
+
+Optional (UI toggle)
+
+RAM-safe on 8 GB systems
 
 🧪 CLI Usage
 Single Backend
@@ -125,7 +173,6 @@ Run:
 
 streamlit run app.py
 
-
 Features
 
 Backend selection (PyTorch / OpenVINO / Compare)
@@ -138,11 +185,16 @@ Annotated images
 
 Performance comparison
 
-⚡ Performance Example
+Optional VLM Q&A (toggle-controlled)
+
+⚡ Performance Example (CV Pipeline Only)
 Backend	Latency (ms)	FPS
 PyTorch	~435	~2.3
 OpenVINO	~244	~4.1
 Speedup	~1.8×	—
+
+VLM latency is intentionally excluded from benchmarks.
+
 🧩 Tech Stack
 
 Python 3.11.9
@@ -153,9 +205,7 @@ PyTorch
 
 MobileNetV3
 
-ONNX
-
-onnxscript
+ONNX + onnxscript
 
 OpenVINO Runtime
 
@@ -163,24 +213,31 @@ OpenCV, NumPy
 
 Streamlit
 
+Qwen2.5-0.5B-Instruct (VLM)
+
 🎯 Key Engineering Decisions
 
-Classifiers accept NumPy arrays or file paths
+CV and language reasoning are decoupled
 
-No runtime dependency on test modules
+OpenVINO used only where it provides real CPU benefit
+
+VLM operates on structured CV output, not raw images
 
 Single pipeline shared by CLI & GUI
 
-Clean separation of logic and presentation
+VLM excluded from latency/FPS metrics
 
-Optimized inference without accuracy loss
+Lazy-loading to protect low-RAM systems
 
 ⚠️ Memory & Performance Notes (Important)
 
-This project combines real-time computer vision models with an optional Vision-Language Model (VLM).
-These components have very different resource requirements.
+This project combines:
 
-Please read this section carefully before running the application.
+Real-time CV models
+
+An optional language model
+
+These have very different resource requirements.
 
 🧠 Model Categories Used
 1️⃣ Real-time Inference Models (Lightweight)
@@ -199,14 +256,6 @@ YOLO (detection)
 
 OpenVINO (MobileNetV3 – FP16 / FP32)
 
-Characteristics
-
-Optimized for CPU
-
-Static computation graph
-
-Low memory footprint
-
 Memory Usage
 
 FP32 OpenVINO: ~300–400 MB
@@ -216,122 +265,62 @@ FP16 OpenVINO: ~200–300 MB
 ✅ Runs comfortably on 2–4 GB RAM
 ✅ Stable on low-resource VMs
 
-2️⃣ Vision-Language Model (VLM) – Optional
-
-Used for
-
-Natural language Q&A on images
-(e.g., “How many vehicles are visible?”)
+2️⃣ Vision-Language Model (VLM) — Optional
 
 Technology
 
-BLIP VQA (Vision-Language Model)
+Qwen2.5-0.5B-Instruct (text-only reasoning)
 
-Characteristics
+Purpose
 
-Large multimodal foundation model
+Natural-language Q&A over detection results
 
-Dynamic attention mechanisms
+Example:
 
-PyTorch-based
-
-Memory-intensive by design
+“What are the colors of the vehicles?”
 
 Memory Usage
 
-Model weights: ~1.5–2.0 GB
+Model + runtime: ~0.8–1.2 GB
 
-Runtime buffers & tokenizer: ~2–3 GB
+✅ Safe on 8 GB RAM
+✅ Much lighter than traditional VLMs (e.g., BLIP)
 
-Total footprint: ~4–6 GB
+🚨 Why VLM Is Optional
 
-⚠️ Requires 12–16 GB RAM for stable execution
+Language models dominate latency
 
-🚨 Why VLM May Crash or Restart the VM
+They do not benefit from OpenVINO
 
-On low-memory systems (≤ 8 GB RAM), enabling VLM may cause:
+Not required for core CV functionality
 
-VM freeze
+VLM is:
 
-Sudden restart
+Lazy-loaded
 
-OOM (Out-Of-Memory) termination
+UI-controlled
 
-Reason
-
-Large model weights loaded into RAM
-
-PyTorch runtime buffer allocation
-
-Linux OOM killer terminates the process
-
-❗ This is expected behavior, not a bug.
-
-✅ Recommended Execution Strategy
-✔️ Low-RAM VMs (≤ 8 GB)
-
-Run without VLM
-
-Use:
-
-YOLO detection
-
-OpenVINO FP16 classification
-
-Streamlit UI (CV pipeline only)
-
-streamlit run app.py
-# Do NOT enter a VLM question
-
-✔️ High-RAM Systems (≥ 16 GB) — Recommended
-
-Enable VLM
-
-Ideal for:
-
-macOS (Apple Silicon)
-
-Linux workstations
-
-streamlit run app.py
-# Enter a VLM question in the UI
-
-🧩 Design Decision: Why VLM Is Optional
-
-Lazy-loaded (only when queried)
-
-Excluded from performance benchmarks
-
-Not required for core CV pipeline
-
-This ensures:
-
-Fast real-time inference
-
-Stability on low-resource systems
-
-Advanced reasoning when resources permit
+Excluded from benchmarks
 
 📊 Memory Requirement Summary
 Component	RAM Requirement
 OpenVINO FP16 inference	2–4 GB
 YOLO + OpenVINO pipeline	4–6 GB
-VLM (BLIP Q/A)	12–16 GB
-Full system (VLM + UI + CV)	16 GB (recommended)
+Qwen VLM reasoning	~1 GB
+Full system (recommended)	8–12 GB
 ❓ Why YOLO Detection Is Not Converted to OpenVINO
 
-Only the classification model is converted to OpenVINO.
-YOLO detection remains in PyTorch by design.
+Only classification is converted to OpenVINO.
 
-Reasons:
+Reasons
 
-MobileNetV3 gains significant CPU speedup from OpenVINO
+MobileNetV3 gains clear CPU speedup
 
-YOLO models have dynamic shapes & complex post-processing
+YOLO has dynamic shapes & complex post-processing
 
-Limited CPU gains without advanced OpenVINO tuning
+Limited CPU gains without heavy tuning
 
-Easier debugging and faster iteration in PyTorch
+PyTorch simplifies debugging & iteration
 
 This hybrid approach balances:
 
@@ -340,4 +329,3 @@ Performance
 Maintainability
 
 Development efficiency
-

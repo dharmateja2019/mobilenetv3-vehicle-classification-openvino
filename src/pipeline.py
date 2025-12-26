@@ -21,11 +21,12 @@ def _run_single(
     backend="openvino",
     device="CPU",
     output_path=None,
-    qa_question=None,   # 👈 NEW
+    qa_question=None,
 ):
     image = cv2.imread(image_path)
     annotated = image.copy()
 
+    # ---------------- CV PIPELINE TIMING ----------------
     start = time.time()
     detections = detector.detect(image)
 
@@ -37,16 +38,14 @@ def _run_single(
         if crop.size == 0:
             continue
 
-        # ---- COLOR ----
         color = detect_color(crop)
 
-        # ---- CLASSIFICATION ----
         if backend == "pytorch":
             cls = classify_pytorch(crop)
         else:
             with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
                 cv2.imwrite(f.name, crop)
-                cls = classify_openvino(crop, device=device)
+                cls = classify_openvino(f.name, device=device)
                 os.remove(f.name)
 
         vehicle_type = cls["type"]
@@ -56,7 +55,6 @@ def _run_single(
             "color": color
         })
 
-        # ---- DRAW ----
         label = f"{vehicle_type} | {color}"
         cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 0, 0), 3)
         cv2.putText(
@@ -71,11 +69,16 @@ def _run_single(
 
     latency_ms = (time.time() - start) * 1000
     fps = 1000 / latency_ms if latency_ms > 0 else 0
+    # ---------------------------------------------------
 
-    # ---- VLM Q/A (ONCE PER IMAGE) ----
+    # ---------------- VLM (POST-PROCESSING ONLY) ----------------
     qa_answer = None
     if qa_question:
-        qa_answer = ask_question(image, qa_question)
+        vision_result = {
+            "vehicles": vehicles
+        }
+        qa_answer = ask_question(vision_result, qa_question)
+    # -----------------------------------------------------------
 
     if output_path:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -86,8 +89,8 @@ def _run_single(
         "latency_ms": round(latency_ms, 2),
         "fps": round(fps, 2),
         "vehicles": vehicles,
-        "qa_answer": qa_answer,   # 👈 NOT for JSON display
-        "annotated": annotated
+        "qa_answer": qa_answer,
+        "annotated": annotated,
     }
 
 
@@ -101,12 +104,18 @@ def run_pipeline(
         return {
             "compare": {
                 "pytorch": _run_single(
-                    image_path, "pytorch", device,
-                    "outputs/result_pytorch.jpg", qa_question
+                    image_path,
+                    "pytorch",
+                    device,
+                    "outputs/result_pytorch.jpg",
+                    qa_question,
                 ),
                 "openvino": _run_single(
-                    image_path, "openvino", device,
-                    "outputs/result_openvino.jpg", qa_question
+                    image_path,
+                    "openvino",
+                    device,
+                    "outputs/result_openvino.jpg",
+                    qa_question,
                 ),
             }
         }

@@ -12,3 +12,4 @@ onnxscript
 streamlit
 requests
 transformers
+accelerate
