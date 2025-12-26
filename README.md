@@ -1,117 +1,132 @@
-# Vehicle Detection & Classification  
+Vehicle Detection & Classification
+
 YOLO + MobileNetV3 | PyTorch vs OpenVINO
 
-This project implements a **complete end-to-end vehicle detection and classification pipeline** with optimized inference using OpenVINO.  
-It supports **CLI and Streamlit GUI**, along with **PyTorch vs OpenVINO performance comparison**.
+This project implements a complete end-to-end vehicle detection and classification pipeline with optimized inference using OpenVINO.
+It supports both CLI and Streamlit GUI, along with PyTorch vs OpenVINO performance comparison.
 
----
-
-## 🚀 Overview
+🚀 Overview
 
 The system performs:
 
-1. **Vehicle detection** using YOLO
-2. **Vehicle classification** using MobileNetV3
-   - 2-Wheeler (2W)
-   - 4-Wheeler (4W)
-3. **Model export & optimization**
-   - PyTorch → ONNX → OpenVINO IR
-4. **Inference backends**
-   - PyTorch
-   - OpenVINO
-5. **Interfaces**
-   - CLI (`cli.py`)
-   - Streamlit GUI (`app.py`)
+Vehicle detection using YOLO
 
-The project follows a **production-style pipeline**, separating inference logic, pipeline orchestration, tests, and UI.
+Vehicle classification using MobileNetV3
 
----
+2-Wheeler (2W)
 
-## 🧠 Architecture
+4-Wheeler (4W)
 
+Model export & optimization
+
+PyTorch → ONNX → OpenVINO IR
+
+Inference backends
+
+PyTorch
+
+OpenVINO
+
+Interfaces
+
+CLI (cli.py)
+
+Streamlit GUI (app.py)
+
+The project follows a production-style pipeline, separating inference logic, pipeline orchestration, tests, and UI.
+
+🧠 Architecture
 Input Image
-↓
+   ↓
 YOLO Detection (src/detect.py)
-↓
+   ↓
 Vehicle Crops (NumPy arrays)
-↓
+   ↓
 MobileNetV3 Classifier
-├── PyTorch (src/classify/train.py)
-└── OpenVINO (src/classify/openvino_infer.py)
-↓
+   ├── PyTorch (src/classify/train.py)
+   └── OpenVINO (src/classify/openvino_infer.py)
+   ↓
 Annotated Output + Metrics
 
-yaml
-Copy code
+✅ Project Status
+STEP-1: Vehicle Detection — ✅ DONE
 
----
+YOLO-based detection
 
-## ✅ Project Status
+Bounding box extraction
 
-### STEP-1: Vehicle Detection — ✅ DONE
-- YOLO-based detection
-- Bounding box extraction
-- Auto-cropping vehicles
-- CLI + unit tests
+Auto-cropping vehicles
 
-### STEP-2: Vehicle Classification — ✅ DONE
-- Dataset created from YOLO crops
-- MobileNetV3 trained using PyTorch
-- CLI-based classification validation
+CLI + unit tests
 
-Dataset summary:
-- 2W images: 15
-- 4W images: 36
+STEP-2: Vehicle Classification — ✅ DONE
 
-> Dataset is intentionally small to validate the pipeline, not for production accuracy.
+Dataset created from YOLO crops
 
----
+MobileNetV3 trained using PyTorch
 
-### STEP-3: Model Export — ✅ DONE
-- PyTorch → ONNX (`export_onnx.py`)
+CLI-based classification validation
 
-### STEP-4: OpenVINO Conversion — ✅ DONE
-- ONNX → OpenVINO IR (`openvino_convert.sh`)
-- FP16 optimized model
+Dataset summary
 
-### STEP-5: Inference & Comparison — ✅ DONE
-- PyTorch inference
-- OpenVINO inference
-- Latency & FPS comparison
-- Prediction parity verified
+2W images: 15
 
-### STEP-6: CLI & GUI — ✅ DONE
-- Unified pipeline (`src/pipeline.py`)
-- CLI with backend/device selection
-- Streamlit GUI with side-by-side comparison
-- Clean tables and annotated images
+4W images: 36
 
----
+Dataset is intentionally small to validate the pipeline, not for production accuracy.
 
-## 🧪 CLI Usage
+STEP-3: Model Export — ✅ DONE
 
-### Single Backend
-```bash
+PyTorch → ONNX (export_onnx.py)
+
+STEP-4: OpenVINO Conversion — ✅ DONE
+
+ONNX → OpenVINO IR (openvino_convert.sh)
+
+FP16 optimized model
+
+STEP-5: Inference & Comparison — ✅ DONE
+
+PyTorch inference
+
+OpenVINO inference
+
+Latency & FPS comparison
+
+Prediction parity verified
+
+STEP-6: CLI & GUI — ✅ DONE
+
+Unified pipeline (src/pipeline.py)
+
+CLI with backend/device selection
+
+Streamlit GUI with side-by-side comparison
+
+Clean tables and annotated images
+
+🧪 CLI Usage
+Single Backend
 python3 cli.py --image path/to/image.jpg --backend openvino --device CPU
+
 Compare PyTorch vs OpenVINO
-bash
-Copy code
 python3 cli.py --image path/to/image.jpg --backend compare --device CPU
-Outputs:
+
+
+Outputs
 
 outputs/result.jpg
-
 outputs/result_pytorch.jpg
-
 outputs/result_openvino.jpg
 
 🖥️ Streamlit GUI
+
 Run:
 
-bash
-Copy code
 streamlit run app.py
-Features:
+
+
+Features
 
 Backend selection (PyTorch / OpenVINO / Compare)
 
@@ -128,19 +143,28 @@ Backend	Latency (ms)	FPS
 PyTorch	~435	~2.3
 OpenVINO	~244	~4.1
 Speedup	~1.8×	—
-
 🧩 Tech Stack
+
 Python 3.11.9
+
 YOLO (Ultralytics)
+
 PyTorch
+
 MobileNetV3
+
 ONNX
+
 onnxscript
+
 OpenVINO Runtime
+
 OpenCV, NumPy
+
 Streamlit
 
 🎯 Key Engineering Decisions
+
 Classifiers accept NumPy arrays or file paths
 
 No runtime dependency on test modules
@@ -158,10 +182,10 @@ These components have very different resource requirements.
 
 Please read this section carefully before running the application.
 
-🧠 Model Categories Used in This Project
+🧠 Model Categories Used
 1️⃣ Real-time Inference Models (Lightweight)
 
-Used for:
+Used for
 
 Vehicle detection
 
@@ -173,7 +197,7 @@ Technologies
 
 YOLO (detection)
 
-OpenVINO (MobileNetV3 – FP16/FP32)
+OpenVINO (MobileNetV3 – FP16 / FP32)
 
 Characteristics
 
@@ -194,9 +218,9 @@ FP16 OpenVINO: ~200–300 MB
 
 2️⃣ Vision-Language Model (VLM) – Optional
 
-Used for:
+Used for
 
-Natural language Q/A on images
+Natural language Q&A on images
 (e.g., “How many vehicles are visible?”)
 
 Technology
@@ -215,99 +239,105 @@ Memory-intensive by design
 
 Memory Usage
 
-Model weights (model.safetensors): ~1.5–2.0 GB
+Model weights: ~1.5–2.0 GB
 
-Runtime buffers, attention caches, tokenizer: ~2–3 GB
+Runtime buffers & tokenizer: ~2–3 GB
 
-Total VLM footprint: ~4–6 GB
+Total footprint: ~4–6 GB
 
 ⚠️ Requires 12–16 GB RAM for stable execution
 
 🚨 Why VLM May Crash or Restart the VM
 
-If VLM is enabled on a low-memory VM (≤ 8 GB RAM), you may experience:
+On low-memory systems (≤ 8 GB RAM), enabling VLM may cause:
 
 VM freeze
 
 Sudden restart
 
-OOM (Out-Of-Memory) termination during model load
+OOM (Out-Of-Memory) termination
 
-This happens because:
+Reason
 
-VLM loads large model weights into RAM
+Large model weights loaded into RAM
 
-PyTorch allocates additional runtime buffers
-
-Combined memory usage exceeds VM capacity
+PyTorch runtime buffer allocation
 
 Linux OOM killer terminates the process
 
 ❗ This is expected behavior, not a bug.
 
 ✅ Recommended Execution Strategy
-✔️ On Low-RAM VMs (≤ 8 GB)
+✔️ Low-RAM VMs (≤ 8 GB)
 
-Run without VLM enabled
+Run without VLM
 
 Use:
 
-OpenVINO (FP16 recommended)
-
 YOLO detection
+
+OpenVINO FP16 classification
 
 Streamlit UI (CV pipeline only)
 
 streamlit run app.py
 # Do NOT enter a VLM question
 
-✔️ On Local Machines / High-RAM Systems (Recommended)
+✔️ High-RAM Systems (≥ 16 GB) — Recommended
 
-Run with VLM enabled
+Enable VLM
 
-Ideal environments:
+Ideal for:
 
-macOS (especially Apple Silicon)
+macOS (Apple Silicon)
 
-Linux systems with ≥ 16 GB RAM
+Linux workstations
 
 streamlit run app.py
-# Enter a question in the VLM Q/A box
+# Enter a VLM question in the UI
 
 🧩 Design Decision: Why VLM Is Optional
 
-The VLM is intentionally:
+Lazy-loaded (only when queried)
 
-Lazy-loaded (only loads when a question is asked)
+Excluded from performance benchmarks
 
-Excluded from performance metrics
-
-Not required for core functionality
+Not required for core CV pipeline
 
 This ensures:
 
-Real-time inference remains fast
+Fast real-time inference
 
-Low-resource environments remain stable
+Stability on low-resource systems
 
-Advanced reasoning is available when resources permit
+Advanced reasoning when resources permit
 
-📊 Summary Table
+📊 Memory Requirement Summary
 Component	RAM Requirement
 OpenVINO FP16 inference	2–4 GB
 YOLO + OpenVINO pipeline	4–6 GB
 VLM (BLIP Q/A)	12–16 GB
-VLM + Streamlit + CV	16 GB (recommended)
+Full system (VLM + UI + CV)	16 GB (recommended)
+❓ Why YOLO Detection Is Not Converted to OpenVINO
 
-### Why YOLO Detection Is Not Converted to OpenVINO
+Only the classification model is converted to OpenVINO.
+YOLO detection remains in PyTorch by design.
 
-In this project, only the classification model is converted to OpenVINO, while the detection model (YOLO) remains in PyTorch.
+Reasons:
 
-This is an intentional design decision:
+MobileNetV3 gains significant CPU speedup from OpenVINO
 
-- The classification model (MobileNetV3) is lightweight and benefits significantly from OpenVINO CPU optimizations (FP16/INT8).
-- YOLO detection models are larger, involve dynamic shapes and complex post-processing, and offer limited CPU performance gains from OpenVINO without additional optimization steps.
-- Keeping YOLO in PyTorch simplifies development, debugging, and future model updates.
+YOLO models have dynamic shapes & complex post-processing
 
-This hybrid approach balances performance, maintainability, and development efficiency.
+Limited CPU gains without advanced OpenVINO tuning
+
+Easier debugging and faster iteration in PyTorch
+
+This hybrid approach balances:
+
+Performance
+
+Maintainability
+
+Development efficiency
 
