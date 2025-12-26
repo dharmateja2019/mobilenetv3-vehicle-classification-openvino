@@ -151,9 +151,163 @@ Clean separation of logic and presentation
 
 Optimized inference without accuracy loss
 
-👤 Author
-Dharmateja
-QA Engineer | AI & OpenVINO Practitioner
+⚠️ Memory & Performance Notes (Important)
 
-yaml
-Copy code
+This project combines real-time computer vision models with an optional Vision-Language Model (VLM).
+These components have very different resource requirements.
+
+Please read this section carefully before running the application.
+
+🧠 Model Categories Used in This Project
+1️⃣ Real-time Inference Models (Lightweight)
+
+Used for:
+
+Vehicle detection
+
+Vehicle classification
+
+Color extraction
+
+Technologies
+
+YOLO (detection)
+
+OpenVINO (MobileNetV3 – FP16/FP32)
+
+Characteristics
+
+Optimized for CPU
+
+Static computation graph
+
+Low memory footprint
+
+Memory Usage
+
+FP32 OpenVINO: ~300–400 MB
+
+FP16 OpenVINO: ~200–300 MB
+
+✅ Runs comfortably on 2–4 GB RAM
+✅ Stable on low-resource VMs
+
+2️⃣ Vision-Language Model (VLM) – Optional
+
+Used for:
+
+Natural language Q/A on images
+(e.g., “How many vehicles are visible?”)
+
+Technology
+
+BLIP VQA (Vision-Language Model)
+
+Characteristics
+
+Large multimodal foundation model
+
+Dynamic attention mechanisms
+
+PyTorch-based
+
+Memory-intensive by design
+
+Memory Usage
+
+Model weights (model.safetensors): ~1.5–2.0 GB
+
+Runtime buffers, attention caches, tokenizer: ~2–3 GB
+
+Total VLM footprint: ~4–6 GB
+
+⚠️ Requires 12–16 GB RAM for stable execution
+
+🚨 Why VLM May Crash or Restart the VM
+
+If VLM is enabled on a low-memory VM (≤ 8 GB RAM), you may experience:
+
+VM freeze
+
+Sudden restart
+
+OOM (Out-Of-Memory) termination during model load
+
+This happens because:
+
+VLM loads large model weights into RAM
+
+PyTorch allocates additional runtime buffers
+
+Combined memory usage exceeds VM capacity
+
+Linux OOM killer terminates the process
+
+❗ This is expected behavior, not a bug.
+
+✅ Recommended Execution Strategy
+✔️ On Low-RAM VMs (≤ 8 GB)
+
+Run without VLM enabled
+
+Use:
+
+OpenVINO (FP16 recommended)
+
+YOLO detection
+
+Streamlit UI (CV pipeline only)
+
+streamlit run app.py
+# Do NOT enter a VLM question
+
+✔️ On Local Machines / High-RAM Systems (Recommended)
+
+Run with VLM enabled
+
+Ideal environments:
+
+macOS (especially Apple Silicon)
+
+Linux systems with ≥ 16 GB RAM
+
+streamlit run app.py
+# Enter a question in the VLM Q/A box
+
+🧩 Design Decision: Why VLM Is Optional
+
+The VLM is intentionally:
+
+Lazy-loaded (only loads when a question is asked)
+
+Excluded from performance metrics
+
+Not required for core functionality
+
+This ensures:
+
+Real-time inference remains fast
+
+Low-resource environments remain stable
+
+Advanced reasoning is available when resources permit
+
+📊 Summary Table
+Component	RAM Requirement
+OpenVINO FP16 inference	2–4 GB
+YOLO + OpenVINO pipeline	4–6 GB
+VLM (BLIP Q/A)	12–16 GB
+VLM + Streamlit + CV	16 GB (recommended)
+
+### Why YOLO Detection Is Not Converted to OpenVINO
+
+In this project, only the classification model is converted to OpenVINO, while the detection model (YOLO) remains in PyTorch.
+
+This is an intentional design decision:
+
+- The classification model (MobileNetV3) is lightweight and benefits significantly from OpenVINO CPU optimizations (FP16/INT8).
+- YOLO detection models are larger, involve dynamic shapes and complex post-processing, and offer limited CPU performance gains from OpenVINO without additional optimization steps.
+- Keeping YOLO in PyTorch simplifies development, debugging, and future model updates.
+
+This hybrid approach balances performance, maintainability, and development efficiency.
+

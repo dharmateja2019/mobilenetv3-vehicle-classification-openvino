@@ -46,7 +46,7 @@ def _run_single(
         else:
             with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
                 cv2.imwrite(f.name, crop)
-                cls = classify_openvino(f.name, device=device)
+                cls = classify_openvino(crop, device=device)
                 os.remove(f.name)
 
         vehicle_type = cls["type"]

@@ -23,7 +23,7 @@ venv/
 .venv/
 env/
 ENV/
-virtual_ai/
+vechicle_ai/
 
 # ===============================
 # Jupyter

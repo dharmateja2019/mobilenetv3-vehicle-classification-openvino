@@ -16,23 +16,14 @@ _preprocess = transforms.Compose([
 ])
 
 core = Core()
-
-# 🔥 cache compiled models per device
 _compiled_models = {}
-
 
 def _get_compiled_model(device):
     if device not in _compiled_models:
         _compiled_models[device] = core.compile_model(MODEL_XML, device)
     return _compiled_models[device]
 
-
 def classify_openvino(image, device="CPU"):
-    """
-    image: str (path) OR np.ndarray (H,W,C)
-    device: CPU | GPU | AUTO
-    """
-
     compiled_model = _get_compiled_model(device)
     output_layer = compiled_model.output(0)
 
@@ -41,7 +32,12 @@ def classify_openvino(image, device="CPU"):
     else:
         img = Image.open(image).convert("RGB")
 
-    input_tensor = _preprocess(img).unsqueeze(0).numpy()
+    input_tensor = (
+        _preprocess(img)
+        .unsqueeze(0)
+        .numpy()
+        .astype(np.float32)
+    )
 
     logits = compiled_model([input_tensor])[output_layer][0]
 

@@ -5,7 +5,6 @@ import torch
 _processor = None
 _model = None
 
-
 def _load_model():
     global _processor, _model
     if _model is None:
@@ -17,9 +16,8 @@ def _load_model():
         )
         _model.eval()
 
-
 def ask_question(image, question: str) -> str:
-    _load_model()
+    _load_model()   # <-- loads ONLY when question is asked
 
     if not isinstance(image, Image.Image):
         image = Image.fromarray(image).convert("RGB")
